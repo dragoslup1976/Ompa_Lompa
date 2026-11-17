@@ -68,20 +68,18 @@ namespace OmpaLompa.Audio
         float nextRetryTime;
         bool permissionGranted;
 
-        IEnumerator Start()
-        {
-            // Required on macOS/iOS/Android/WebGL; returns immediately where no prompt exists.
-            if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
-                yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
+  IEnumerator Start()
+{
+    yield return MicPermissionMac.EnsureAccess();
+    permissionGranted = MicPermissionMac.Status == 3;
 
-            permissionGranted = Application.HasUserAuthorization(UserAuthorization.Microphone);
-            if (!permissionGranted)
-                Debug.LogWarning("[MicrophoneInput] Microphone permission denied.");
-            else
-                OpenMicrophone();
-        }
+    if (!permissionGranted)
+        Debug.LogWarning("[MicrophoneInput] Microphone permission not granted (status " + MicPermissionMac.Status + ").");
+    else
+        OpenMicrophone();
+}
 
-        void OnDisable() => CloseMicrophone();
+void OnDisable() => CloseMicrophone();
 
         void OnValidate()
         {
