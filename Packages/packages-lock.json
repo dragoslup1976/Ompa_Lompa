@@ -1,11 +1,47 @@
 {
   "dependencies": {
+    "com.iam1337.extosc": {
+      "version": "https://github.com/Iam1337/extOSC.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0"
+      },
+      "hash": "852e5b5290be522308a70657e82c7147a99a65ab"
+    },
+    "com.tuatmcc.unityjoycon": {
+      "version": "https://github.com/tuatmcc/UnityJoyCon.git?path=Packages/com.tuatmcc.unityjoycon#v0.2.1",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.inputsystem": "1.14.2"
+      },
+      "hash": "c4d29d00f6c36e937448b6b446dac90b3a314257"
+    },
+    "com.unity.inputsystem": {
+      "version": "1.14.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.multiplayer.center": {
       "version": "1.0.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
         "com.unity.modules.uielements": "1.0.0"
+      }
+    },
+    "com.unity.ugui": {
+      "version": "2.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0"
       }
     },
     "com.unity.modules.accessibility": {
