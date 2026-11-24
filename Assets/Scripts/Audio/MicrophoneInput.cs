@@ -41,6 +41,16 @@ namespace OmpaLompa.Audio
         [Tooltip("Upper edge of the 'low' band. Blowing into a mic is mostly noise under this limit.")]
         [SerializeField, Min(50f)] float lowBandMaxHz = 250f;
 
+        [Header("Pitch (voice height)")]
+        [Tooltip("Lowest pitch searched (Hz). Adult male voice starts around 80-100 Hz.")]
+        [SerializeField, Min(40f)] float pitchMinHz = 80f;
+        [Tooltip("Highest pitch searched (Hz). A high scream can reach 800-1000 Hz.")]
+        [SerializeField, Min(200f)] float pitchMaxHz = 1000f;
+        [Tooltip("How periodic the sound must be to count as a pitch (0..1). Lower = more detections, more errors.")]
+        [SerializeField, Range(0.3f, 0.99f)] float pitchMinConfidence = 0.8f;
+        [Tooltip("Pitch is only estimated above this loudness (RMS).")]
+        [SerializeField, Min(0f)] float pitchMinRms = 0.02f;
+
         // ---- Public read-only data -------------------------------------------------------
 
         /// <summary>RMS loudness of the latest window (linear, 0..1).</summary>
@@ -57,11 +67,16 @@ namespace OmpaLompa.Audio
         public int SampleRate { get; private set; }
         public float RmsWindowMs => rmsWindowMs;
         public string DeviceName { get => deviceName; set => deviceName = value; }
+        /// <summary>Pitch of the latest block in Hz, 0 when there is no clear pitch.</summary>
+        public float Pitch { get; private set; }
+        /// <summary>How clear the pitch is (0..1).</summary>
+        public float PitchConfidence { get; private set; }
 
         AudioClip clip;
         float[] ring;           // whole looping clip, copied once per frame
         float[] block;          // newest fftSize mono samples
         AudioBandAnalyzer analyzer;
+        readonly PitchDetector pitchDetector = new PitchDetector();
         int channels = 1;
         int lastPos;
         long samplesCaptured;
@@ -169,6 +184,7 @@ void OnDisable() => CloseMicrophone();
             clip = null;
             IsCapturing = false;
             Rms = LowFreqLevel = LowFreqRatio = 0f;
+            Pitch = PitchConfidence = 0f;
             RmsDb = -80f;
             nextRetryTime = Time.unscaledTime + retryInterval;
         }
@@ -200,6 +216,12 @@ void OnDisable() => CloseMicrophone();
             analyzer.Analyze(block, SampleRate, lowBandMinHz, lowBandMaxHz, out float low, out float total);
             LowFreqLevel = Mathf.Sqrt(low);
             LowFreqRatio = total > 1e-12f ? Mathf.Clamp01(low / total) : 0f;
+
+            float conf = 0f;
+            Pitch = Rms >= pitchMinRms
+                ? pitchDetector.Estimate(block, SampleRate, pitchMinHz, pitchMaxHz, pitchMinConfidence, out conf)
+                : 0f;
+            PitchConfidence = conf;
         }
     }
 }

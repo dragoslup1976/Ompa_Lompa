@@ -9,6 +9,9 @@ namespace OmpaLompa.Audio
     /// </summary>
     public class AudioTestCubeReaction : MonoBehaviour
     {
+        [Tooltip("Flash red when jumping. Turn OFF on video quads (the flash needs a material instance).")]
+        [SerializeField] bool flashRed = true;
+
         [Header("Jump (shout)")]
         [SerializeField] float jumpHeight = 1.2f;
         [SerializeField] float jumpDuration = 0.5f;
@@ -27,7 +30,8 @@ namespace OmpaLompa.Audio
         {
             basePosition = transform.position;
             cubeRenderer = GetComponent<Renderer>();
-            baseColor = cubeRenderer.material.color; // material instance, doesn't touch the shared asset
+            if (flashRed)
+                baseColor = cubeRenderer.material.color; // material instance, doesn't touch the shared asset
         }
 
         /// <summary>Hook to OnShout.</summary>
@@ -59,9 +63,12 @@ namespace OmpaLompa.Audio
 
             transform.position = pos;
 
-            if (redT < 1f)
-                redT = Mathf.Min(1f, redT + Time.deltaTime / redDuration);
-            cubeRenderer.material.color = Color.Lerp(Color.red, baseColor, redT);
+            if (flashRed)
+            {
+                if (redT < 1f)
+                    redT = Mathf.Min(1f, redT + Time.deltaTime / redDuration);
+                cubeRenderer.material.color = Color.Lerp(Color.red, baseColor, redT);
+            }
         }
     }
 }
